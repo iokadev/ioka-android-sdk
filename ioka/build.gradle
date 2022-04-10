@@ -15,13 +15,13 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField "String", 'BASE_URL', '"https://stage-api.ioka.kz"'
+            buildConfigField "String", 'BASE_URL', '"https://stage-api.ioka.kz/"'
         }
 
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            buildConfigField "String", 'BASE_URL', '"https://payments.ioka.kz/orders/"'
+            buildConfigField "String", 'BASE_URL', '"https://api.ioka.kz/"'
         }
     }
     kotlinOptions {

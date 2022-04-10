@@ -14,7 +14,6 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="@drawable/ioka_ic_close"
-        app:titleCentered="true"
         app:titleTextColor="@color/ioka_color_text"
         tools:title="К оплате 12 560 ₸" />
 

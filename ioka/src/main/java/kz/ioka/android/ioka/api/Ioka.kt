@@ -21,8 +21,6 @@ object Ioka {
 
     fun init(apiKey: String) {
         Config.apiKey = apiKey
-
-        DependencyInjector.createDependencies()
     }
 
     // TODO Implement Google Pay

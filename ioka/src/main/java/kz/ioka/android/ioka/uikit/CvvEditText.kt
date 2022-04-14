@@ -21,7 +21,7 @@ import kz.ioka.android.ioka.util.getPrimaryColor
 import kz.ioka.android.ioka.util.toPx
 
 
-class CvvEditText @JvmOverloads constructor(
+internal class CvvEditText @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : LinearLayoutCompat(context, attrs, defStyleAttr) {
 

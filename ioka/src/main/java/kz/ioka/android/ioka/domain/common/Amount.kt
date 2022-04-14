@@ -5,7 +5,7 @@ import kotlinx.parcelize.Parcelize
 import java.math.BigDecimal
 
 @Parcelize
-data class Amount(
+internal data class Amount(
     val amount: BigDecimal,
     val currency: Currency = Currency.KZT
 ) : Parcelable

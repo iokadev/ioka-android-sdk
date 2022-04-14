@@ -12,7 +12,7 @@ import kz.ioka.android.ioka.domain.errorHandler.ResultWrapper
 import kz.ioka.android.ioka.domain.payment.PaymentModel
 
 @Parcelize
-class SaveCardConfirmationBehavior(
+internal class SaveCardConfirmationBehavior(
     override val toolbarTitleRes: Int = R.string.ioka_common_payment_confirmation,
     private val url: String,
     private val customerToken: String,

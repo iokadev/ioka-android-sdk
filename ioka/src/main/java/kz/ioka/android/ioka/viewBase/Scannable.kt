@@ -4,7 +4,7 @@ import android.content.Intent
 import io.card.payment.CardIOActivity
 import io.card.payment.CreditCard
 
-interface Scannable {
+internal interface Scannable {
 
     fun onCardScanned(cardNumber: String)
 

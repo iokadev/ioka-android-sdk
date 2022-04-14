@@ -3,7 +3,7 @@ package kz.ioka.android.ioka.domain.common
 import android.text.TextUtils
 import java.io.Serializable
 
-enum class Currency(
+internal enum class Currency(
     val code: Int,
     val shortName: String,
     val symbol: String = shortName,
@@ -59,12 +59,11 @@ enum class Currency(
 
     val displaySymbol by lazy { if (TextUtils.isEmpty(this.symbol)) this.shortName else this.symbol }
 
-    private constructor(code: Int, shortName: String, symbolHex: Int) : this(
+    constructor(code: Int, shortName: String, symbolHex: Int) : this(
         code,
         shortName,
         String(Character.toChars(symbolHex))
-    ) {
-    }
+    )
 
     companion object {
 
@@ -98,6 +97,6 @@ enum class Currency(
     }
 }
 
-fun String.toCurrency(): Currency {
+internal fun String.toCurrency(): Currency {
     return Currency.fromShortName(this)
 }

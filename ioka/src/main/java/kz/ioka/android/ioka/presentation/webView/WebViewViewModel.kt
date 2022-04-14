@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
-class WebViewViewModelFactory(
+internal class WebViewViewModelFactory(
     private val behavior: WebViewBehavior
 ) : ViewModelProvider.Factory {
 
@@ -19,7 +19,7 @@ class WebViewViewModelFactory(
 
 }
 
-class WebViewViewModel(
+internal class WebViewViewModel(
     private val behavior: WebViewBehavior
 ) : ViewModel() {
 
@@ -50,7 +50,7 @@ class WebViewViewModel(
 
 }
 
-sealed class ResultState {
+internal sealed class ResultState {
 
     object Success : ResultState()
 

@@ -1,6 +1,6 @@
 package kz.ioka.android.ioka.presentation.flows.common
 
-sealed class PaymentState {
+internal sealed class PaymentState {
 
     object DEFAULT : PaymentState()
     object DISABLED : PaymentState()

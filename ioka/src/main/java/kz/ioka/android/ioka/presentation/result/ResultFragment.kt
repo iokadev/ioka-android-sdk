@@ -14,7 +14,7 @@ import kz.ioka.android.ioka.R
 import kz.ioka.android.ioka.presentation.launcher.PaymentLauncherActivity
 import kz.ioka.android.ioka.uikit.IokaStateButton
 
-class ResultFragment : DialogFragment(R.layout.ioka_fragment_result) {
+internal class ResultFragment : DialogFragment(R.layout.ioka_fragment_result) {
 
     companion object {
         private const val LAUNCHER = "ResultFragment_LAUNCHER"

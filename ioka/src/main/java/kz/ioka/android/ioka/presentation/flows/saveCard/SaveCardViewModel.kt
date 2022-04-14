@@ -123,7 +123,7 @@ internal class SaveCardViewModel constructor(
 
 }
 
-sealed class SaveCardRequestState {
+internal sealed class SaveCardRequestState {
 
     object DEFAULT : SaveCardRequestState()
     object DISABLED : SaveCardRequestState()

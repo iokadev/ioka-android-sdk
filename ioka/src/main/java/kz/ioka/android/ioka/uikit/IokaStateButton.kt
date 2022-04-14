@@ -117,7 +117,7 @@ internal class IokaStateButton @JvmOverloads constructor(
 
 }
 
-sealed class ButtonState {
+internal sealed class ButtonState {
 
     object Default : ButtonState()
     object Disabled : ButtonState()
@@ -126,7 +126,7 @@ sealed class ButtonState {
 
 }
 
-interface Callback {
+internal interface Callback {
 
     fun onSuccess(): () -> Unit
 

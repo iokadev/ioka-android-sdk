@@ -3,6 +3,7 @@ package kz.ioka.android.ioka.domain.order
 import kotlinx.coroutines.Dispatchers
 import kz.ioka.android.ioka.data.order.OrderApi
 import kz.ioka.android.ioka.domain.common.Currency
+import kz.ioka.android.ioka.domain.common.toCurrency
 import kz.ioka.android.ioka.domain.errorHandler.ResultWrapper
 import kz.ioka.android.ioka.domain.errorHandler.safeApiCall
 import kz.ioka.android.ioka.util.toAmount
@@ -22,7 +23,7 @@ internal class OrderRepositoryImpl(
             val orderResponse = orderApi.getOrderById(orderId)
 
             val amount = (orderResponse.amount ?: 0).toAmount(
-                Currency.fromShortName(orderResponse.currency ?: Currency.KZT.shortName)
+                orderResponse.currency?.toCurrency() ?: Currency.KZT
             )
 
             OrderModel(

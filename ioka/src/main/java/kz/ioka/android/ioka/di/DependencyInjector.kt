@@ -15,32 +15,43 @@ import java.net.ProtocolException
 
 internal object DependencyInjector {
 
-    lateinit var cardApi: CardApi
-    lateinit var cardInfoApi: CardInfoApi
-    lateinit var paymentApi: PaymentApi
-    lateinit var orderApi: OrderApi
+    private val loggingInterceptor by lazy {
+        val loggingInterceptor = HttpLoggingInterceptor()
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
+    }
 
-    fun createDependencies() {
+    private val okHttpClient by lazy {
         val okHttpClientBuilder = OkHttpClient.Builder()
 
         if (BuildConfig.DEBUG) {
-            val loggingInterceptor = HttpLoggingInterceptor()
-            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
-            okHttpClientBuilder
-                .addInterceptor(loggingInterceptor)
-                .build()
+            okHttpClientBuilder.addInterceptor(loggingInterceptor)
         }
 
-        val retrofit = Retrofit.Builder()
+        okHttpClientBuilder.build()
+    }
+
+    private val retrofit by lazy {
+        Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
-            .client(okHttpClientBuilder.build())
+            .client(okHttpClient)
             .build()
+    }
 
-        cardApi = retrofit.create(CardApi::class.java)
-        cardInfoApi = retrofit.create(CardInfoApi::class.java)
-        paymentApi = retrofit.create(PaymentApi::class.java)
-        orderApi = retrofit.create(OrderApi::class.java)
+    val cardApi: CardApi by lazy {
+        retrofit.create(CardApi::class.java)
+    }
+
+    val cardInfoApi: CardInfoApi by lazy {
+        retrofit.create(CardInfoApi::class.java)
+    }
+
+    val paymentApi: PaymentApi by lazy {
+        retrofit.create(PaymentApi::class.java)
+    }
+
+    val orderApi: OrderApi by lazy {
+        retrofit.create(OrderApi::class.java)
     }
 
 }

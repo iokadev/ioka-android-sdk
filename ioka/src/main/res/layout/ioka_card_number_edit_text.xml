@@ -31,9 +31,6 @@
         android:layout_width="24dp"
         android:layout_height="16dp"
         android:layout_marginEnd="4dp"
-        android:background="@drawable/ioka_bg_issuing_bank"
-        android:paddingHorizontal="6dp"
-        android:paddingVertical="2dp"
         android:visibility="invisible"
         tools:srcCompat="@drawable/ioka_ic_bank_kaspi"
         tools:visibility="visible" />
@@ -43,7 +40,6 @@
         android:layout_width="24dp"
         android:layout_height="16dp"
         android:layout_marginEnd="12dp"
-        android:background="@drawable/ioka_bg_issuing_bank"
         android:visibility="invisible"
         tools:srcCompat="@drawable/ioka_ic_ps_visa"
         tools:visibility="visible" />

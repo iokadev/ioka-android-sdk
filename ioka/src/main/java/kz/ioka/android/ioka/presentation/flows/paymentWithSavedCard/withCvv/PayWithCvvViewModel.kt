@@ -3,6 +3,7 @@ package kz.ioka.android.ioka.presentation.flows.paymentWithSavedCard.withCvv
 import androidx.lifecycle.*
 import kotlinx.coroutines.launch
 import kz.ioka.android.ioka.Config
+import kz.ioka.android.ioka.domain.cardInfo.CardBrandModel
 import kz.ioka.android.ioka.domain.errorHandler.ResultWrapper
 import kz.ioka.android.ioka.domain.payment.PaymentModel
 import kz.ioka.android.ioka.domain.payment.PaymentRepository
@@ -14,7 +15,7 @@ internal class CvvViewModelFactory(
     val launcher: PayWithCvvLauncher,
     private val repository: PaymentRepository
 ) : ViewModelProvider.Factory {
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return CvvViewModel(launcher, repository) as T
     }
 }
@@ -29,7 +30,7 @@ internal class CvvViewModel(
     val order = launcher.order
     var cardId: String = launcher.cardId
     var cardNumber: String = launcher.cardNumber
-    var cardType: String = launcher.cardType
+    var cardType: CardBrandModel = CardBrandModel.getByCode(launcher.cardType)
 
     var paymentId: String = ""
 

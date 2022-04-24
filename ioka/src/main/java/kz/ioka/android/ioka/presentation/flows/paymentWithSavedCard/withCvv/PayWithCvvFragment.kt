@@ -28,7 +28,6 @@ import kz.ioka.android.ioka.uikit.IokaStateButton
 import kz.ioka.android.ioka.uikit.TooltipWindow
 import kz.ioka.android.ioka.util.shortPanMask
 import kz.ioka.android.ioka.util.showErrorToast
-import kz.ioka.android.ioka.util.toCardType
 import kz.ioka.android.ioka.viewBase.BaseActivity
 import kz.ioka.android.ioka.viewBase.BasePaymentFragment
 
@@ -136,7 +135,7 @@ internal class PayWithCvvFragment : BasePaymentFragment(R.layout.ioka_fragment_c
     private fun setInitialData() {
         ivCardType.setImageDrawable(
             ContextCompat.getDrawable(
-                requireContext(), viewModel.cardType.toCardType().cardTypeRes
+                requireContext(), viewModel.cardType.iconRes
             )
         )
         tvCardNumber.text = viewModel.cardNumber.shortPanMask()

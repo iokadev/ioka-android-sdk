@@ -1,56 +1,36 @@
 package kz.ioka.android.ioka.domain.cardInfo
 
-import kz.ioka.android.ioka.data.cardInfo.BrandResponseDto
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kz.ioka.android.ioka.data.cardInfo.CardInfoApi
-import kz.ioka.android.ioka.data.cardInfo.EmitterResponseDto
-import retrofit2.Response
+import kz.ioka.android.ioka.domain.errorHandler.ResultWrapper
+import kz.ioka.android.ioka.domain.errorHandler.safeApiCall
 
 internal interface CardInfoRepository {
 
-    suspend fun getBrand(partialCardBin: String): CardBrandModel
-    suspend fun getEmitter(cardBin: String): CardEmitterModel
+    suspend fun getBrand(partialCardBin: String): ResultWrapper<CardBrandModel>
+    suspend fun getEmitter(cardBin: String): ResultWrapper<CardEmitterModel>
 
 }
 
 internal class CardInfoRepositoryImpl constructor(
-    private val cardInfoApi: CardInfoApi
+    private val cardInfoApi: CardInfoApi,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : CardInfoRepository {
 
-    override suspend fun getBrand(partialCardBin: String): CardBrandModel {
-        val response: Response<BrandResponseDto>
+    override suspend fun getBrand(partialCardBin: String): ResultWrapper<CardBrandModel> {
+        return safeApiCall(dispatcher) {
+            val response = cardInfoApi.getBrand(partialCardBin)
 
-        try {
-            response = cardInfoApi.getBrand(partialCardBin)
-        } catch (t: Throwable) {
-            return CardBrandModel.Unknown
-        }
-
-        return if (!response.isSuccessful) {
-            CardBrandModel.Unknown
-        } else {
-            CardBrandModel.values().find {
-                it.code == response.body()?.brand
-            } ?: CardBrandModel.Unknown
+            CardBrandModel.getByCode(response.brand)
         }
     }
 
-    override suspend fun getEmitter(cardBin: String): CardEmitterModel {
-        val response: Response<EmitterResponseDto>
+    override suspend fun getEmitter(cardBin: String): ResultWrapper<CardEmitterModel> {
+        return safeApiCall(dispatcher) {
+            val response = cardInfoApi.getEmitter(cardBin)
 
-        try {
-            response = cardInfoApi.getEmitter(cardBin)
-        } catch (t: Throwable) {
-            return CardEmitterModel.Unknown
-        }
-
-        return if (!response.isSuccessful) {
-            CardEmitterModel.Unknown
-        } else {
-            val emitter = response.body()
-
-            return CardEmitterModel.values().find {
-                it.name == emitter?.emitterCode
-            } ?: CardEmitterModel.Unknown
+            CardEmitterModel.getByCode(response.emitterCode)
         }
     }
 }

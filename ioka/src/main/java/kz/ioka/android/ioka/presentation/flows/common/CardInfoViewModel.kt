@@ -1,20 +1,18 @@
 package kz.ioka.android.ioka.presentation.flows.common
 
 import androidx.lifecycle.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kz.ioka.android.ioka.R
 import kz.ioka.android.ioka.domain.cardInfo.CardBrandModel
 import kz.ioka.android.ioka.domain.cardInfo.CardEmitterModel
 import kz.ioka.android.ioka.domain.cardInfo.CardInfoRepository
+import kz.ioka.android.ioka.domain.errorHandler.ResultWrapper
 import kz.ioka.android.ioka.util.Optional
-import kz.ioka.android.ioka.util.optional
 
 @Suppress("UNCHECKED_CAST")
 internal class CardInfoViewModelFactory(
     private val cardInfoRepository: CardInfoRepository
 ) : ViewModelProvider.Factory {
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return CardInfoViewModel(cardInfoRepository) as T
     }
 }
@@ -55,18 +53,26 @@ internal class CardInfoViewModel constructor(
     }
 
     private fun getCardBrand(partialCardPan: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val brand = cardInfoRepository.getBrand(partialCardPan)
+        viewModelScope.launch {
+            val brandResponse = cardInfoRepository.getBrand(partialCardPan)
 
-            _cardBrand.postValue(Optional.of(CardBrandDvo(brand.iconRes)))
+            if (brandResponse is ResultWrapper.Success) {
+                _cardBrand.postValue(Optional.of(CardBrandDvo(brandResponse.value.iconRes)))
+            } else {
+                _cardBrand.postValue(Optional.of(CardBrandDvo(CardBrandModel.Unknown.iconRes)))
+            }
         }
     }
 
     private fun getCardEmitter(cardPan: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val emitter = cardInfoRepository.getEmitter(cardPan)
+        viewModelScope.launch {
+            val emitterResponse = cardInfoRepository.getEmitter(cardPan)
 
-            _cardEmitter.postValue(Optional.of(CardEmitterDvo(emitter.iconRes)))
+            if (emitterResponse is ResultWrapper.Success) {
+                _cardEmitter.postValue(Optional.of(CardEmitterDvo(emitterResponse.value.iconRes)))
+            } else {
+                _cardEmitter.postValue(Optional.of(CardEmitterDvo(CardEmitterModel.Unknown.iconRes)))
+            }
         }
     }
 

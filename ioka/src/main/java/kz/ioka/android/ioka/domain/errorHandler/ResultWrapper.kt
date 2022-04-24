@@ -8,4 +8,8 @@ internal sealed class ResultWrapper<out T> {
         ResultWrapper<Nothing>()
 
     object NetworkError : ResultWrapper<Nothing>()
+
+    fun isSuccess(): Boolean {
+        return this is Success
+    }
 }

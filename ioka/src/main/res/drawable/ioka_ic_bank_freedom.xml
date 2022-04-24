@@ -1,16 +1,21 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
-    android:height="24dp"
+    android:height="16dp"
     android:viewportWidth="24"
-    android:viewportHeight="24">
+    android:viewportHeight="16">
   <path
-      android:pathData="M4,0L20,0A4,4 0,0 1,24 4L24,20A4,4 0,0 1,20 24L4,24A4,4 0,0 1,0 20L0,4A4,4 0,0 1,4 0z"
-      android:fillColor="#ffffff" />
+      android:pathData="M2,0.25L22,0.25A1.75,1.75 0,0 1,23.75 2L23.75,14A1.75,1.75 0,0 1,22 15.75L2,15.75A1.75,1.75 0,0 1,0.25 14L0.25,2A1.75,1.75 0,0 1,2 0.25z"
+      android:fillColor="#ffffff"/>
   <path
-      android:pathData="M9.4296,6.9462V9.974H20.6768V16.0297H9.4296V23.1095C10.2983,23.5102 11.2127,23.8218 12.1271,24C17.6592,22.9313 22.7799,18.167 22.9628,9.7068L23.0085,6.9462H9.4296Z"
+      android:pathData="M10.6147,5.4731V6.987H16.2383V10.0148H10.6147V13.5547C11.0491,13.7551 11.5063,13.9109 11.9635,14C14.7296,13.4657 17.2899,11.0835 17.3814,6.8534L17.4042,5.4731H10.6147Z"
       android:fillColor="#2E7E33"
-      android:fillType="evenOdd" />
+      android:fillType="evenOdd"/>
   <path
-      android:pathData="M23.0085,6.9462L23.0999,0.4007C19.4881,0.1336 15.8304,0 12.1728,0C8.4695,0 4.8119,0.1336 1.1999,0.4007L1.2457,5.5213L1.3828,9.7069C1.3828,9.7069 1.4286,13.5807 2.7544,16.3859C4.949,21.462 9.4296,23.154 9.4296,23.154V16.0743H20.6768V9.974H9.4296V6.9462H23.0085Z"
-      android:fillColor="#76B949" />
+      android:pathData="M17.4043,5.4731L17.45,2.2004C15.6441,2.0668 13.8152,2 11.9864,2C10.1348,2 8.306,2.0668 6.5,2.2004L6.5229,4.7607L6.5914,6.8534C6.5914,6.8534 6.6143,8.7904 7.2772,10.193C8.3745,12.731 10.6148,13.577 10.6148,13.577V10.0371H16.2384V6.987H10.6148V5.4731H17.4043Z"
+      android:fillColor="#76B949"/>
+  <path
+      android:pathData="M2,0.25L22,0.25A1.75,1.75 0,0 1,23.75 2L23.75,14A1.75,1.75 0,0 1,22 15.75L2,15.75A1.75,1.75 0,0 1,0.25 14L0.25,2A1.75,1.75 0,0 1,2 0.25z"
+      android:strokeWidth="0.5"
+      android:fillColor="#00000000"
+      android:strokeColor="#F0F0F5"/>
 </vector>

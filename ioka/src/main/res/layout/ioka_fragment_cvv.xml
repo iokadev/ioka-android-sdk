@@ -47,7 +47,6 @@
             android:id="@+id/ivCardType"
             android:layout_width="24dp"
             android:layout_height="16dp"
-            android:background="@drawable/ioka_bg_issuing_bank"
             tools:src="@drawable/ioka_ic_ps_visa" />
 
         <androidx.appcompat.widget.AppCompatTextView

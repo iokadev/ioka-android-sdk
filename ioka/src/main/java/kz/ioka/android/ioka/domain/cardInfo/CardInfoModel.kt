@@ -5,23 +5,29 @@ import kz.ioka.android.ioka.R
 
 internal enum class CardBrandModel(
     val code: String,
-    @DrawableRes val iconRes: Int?
+    @DrawableRes val iconRes: Int,
 ) {
 
-    Amex("American Express", R.drawable.ioka_ic_ps_amex),
-    DinersClub("DinnersClub", R.drawable.ioka_ic_ps_diners_club),
+    Amex("AMERICAN_EXPRESS", R.drawable.ioka_ic_ps_amex),
+    DinerClub("DINER_CLUB", R.drawable.ioka_ic_ps_dinersclub),
     Maestro("MAESTRO", R.drawable.ioka_ic_ps_maestro),
     MasterCard("MASTERCARD", R.drawable.ioka_ic_ps_mastercard),
-    Mir("МИР", R.drawable.ioka_ic_ps_mir),
-    UnionPay("UnionPAY", R.drawable.ioka_ic_ps_unionpay),
+    Mir("MIR", R.drawable.ioka_ic_ps_mir),
+    UnionPay("UNION_PAY", R.drawable.ioka_ic_ps_unionpay),
     Visa("VISA", R.drawable.ioka_ic_ps_visa),
-    Unknown("UNKNOWN", null)
+    Unknown("UNKNOWN", R.drawable.ioka_ic_ps_unknown);
+
+    companion object {
+        fun getByCode(code: String): CardBrandModel {
+            return values().find { it.code == code } ?: Unknown
+        }
+    }
 
 }
 
 internal enum class CardEmitterModel(
     val code: String,
-    val iconRes: Int?,
+    @DrawableRes val iconRes: Int?,
 ) {
 
     Alfa("alfabank", R.drawable.ioka_ic_bank_alfa),
@@ -41,5 +47,11 @@ internal enum class CardEmitterModel(
     Sber("sberbank", R.drawable.ioka_ic_bank_sber),
     Vtb("vtbbank", R.drawable.ioka_ic_bank_vtb),
     Unknown("unknown", null);
+
+    companion object {
+        fun getByCode(code: String): CardEmitterModel {
+            return values().find { it.code == code } ?: Unknown
+        }
+    }
 
 }

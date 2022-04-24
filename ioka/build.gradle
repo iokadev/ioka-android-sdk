@@ -14,14 +14,9 @@ android {
     }
 
     buildTypes {
-        debug {
-            buildConfigField "String", 'BASE_URL', '"https://stage-api.ioka.kz/"'
-        }
-
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            buildConfigField "String", 'BASE_URL', '"https://api.ioka.kz/"'
         }
     }
     kotlinOptions {
@@ -52,8 +47,6 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:4.4.0'
     testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0'
 }
-
-apply from: 'publishLocal.gradle'
 
 afterEvaluate {
     publishing {

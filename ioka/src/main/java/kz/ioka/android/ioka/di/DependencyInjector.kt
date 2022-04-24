@@ -1,6 +1,7 @@
 package kz.ioka.android.ioka.di
 
 import kz.ioka.android.ioka.BuildConfig
+import kz.ioka.android.ioka.Config
 import kz.ioka.android.ioka.data.card.CardApi
 import kz.ioka.android.ioka.data.cardInfo.CardInfoApi
 import kz.ioka.android.ioka.data.order.OrderApi
@@ -14,6 +15,14 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.net.ProtocolException
 
 internal object DependencyInjector {
+
+    const val DEBUG_BASE_URL = "https://stage-api.ioka.kz/"
+    const val RELEASE_BASE_URL = "https://api.ioka.kz/"
+
+    private val baseUrl by lazy {
+        if (Config.isDebug) DEBUG_BASE_URL
+        else RELEASE_BASE_URL
+    }
 
     private val loggingInterceptor by lazy {
         val loggingInterceptor = HttpLoggingInterceptor()
@@ -32,7 +41,7 @@ internal object DependencyInjector {
 
     private val retrofit by lazy {
         Retrofit.Builder()
-            .baseUrl(BuildConfig.BASE_URL)
+            .baseUrl(baseUrl)
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()

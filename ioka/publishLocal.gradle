@@ -9,7 +9,7 @@ project.afterEvaluate {
     publishToMavenLocal {
         def groupId = 'com.github.iokadev'
         def artifactId = 'ioka-android-sdk'
-        def versionName = '1.0' + "-local"
+        def versionName = '1.1' + "-local"
         def debugSuffix = "-debug"
         def releaseSuffix = "-release"
         publishing {

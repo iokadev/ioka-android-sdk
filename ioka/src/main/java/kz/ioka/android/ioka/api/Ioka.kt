@@ -19,11 +19,14 @@ object Ioka {
 
     private val cardApi by lazy { DependencyInjector.cardApi }
 
+    // Формат apiKey:
+    // <SHOPID>_test_public_<KEY> - для стейджа
+    // <SHOPID>_live_public_<KEY> - для прода
     fun init(apiKey: String) {
         Config.apiKey = apiKey
+        Config.isDebug = apiKey.contains("test_public")
     }
 
-    // TODO Implement Google Pay
     fun startPaymentFlow(
         orderToken: String,
         configuration: Configuration? = null

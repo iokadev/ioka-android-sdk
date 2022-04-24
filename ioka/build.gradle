@@ -48,6 +48,8 @@ dependencies {
     testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0'
 }
 
+// Используется для локальной публикации библиотеки:
+// https://www.jetbrains.com/help/idea/add-a-gradle-library-to-the-maven-repository.html#publish
 afterEvaluate {
     publishing {
         publications {

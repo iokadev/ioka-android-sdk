@@ -1,7 +1,6 @@
 package kz.ioka.android.ioka.api
 
 import android.app.Activity
-import android.content.Intent
 import kz.ioka.android.ioka.Config
 import kz.ioka.android.ioka.di.DependencyInjector
 import kz.ioka.android.ioka.presentation.flows.payment.PaymentLauncherBehavior
@@ -9,10 +8,8 @@ import kz.ioka.android.ioka.presentation.flows.paymentWithSavedCard.withCvv.CvvP
 import kz.ioka.android.ioka.presentation.flows.paymentWithSavedCard.withoutCvv.PayWithCardIdActivity
 import kz.ioka.android.ioka.presentation.flows.paymentWithSavedCard.withoutCvv.PayWithCardIdLauncher
 import kz.ioka.android.ioka.presentation.flows.saveCard.SaveCardActivity
-import kz.ioka.android.ioka.presentation.flows.saveCard.SaveCardLauncher
 import kz.ioka.android.ioka.presentation.launcher.PaymentLauncherActivity
 import kz.ioka.android.ioka.util.getCustomerId
-import kz.ioka.android.ioka.viewBase.BaseActivity
 import java.net.ProtocolException
 
 object Ioka {
@@ -28,79 +25,58 @@ object Ioka {
     }
 
     fun startPaymentFlow(
+        activity: Activity,
         orderToken: String,
         configuration: Configuration? = null
-    ): (Activity) -> Unit {
+    ) {
         if (Config.isApiKeyInitialized().not()) {
             throw RuntimeException("Init Ioka with your API_KEY")
         }
 
-        return {
-            val intent = PaymentLauncherActivity.provideIntent(
-                it,
-                PaymentLauncherBehavior(
-                    orderToken,
-                    false,
-                    configuration
-                )
-            )
+        val intent = PaymentLauncherActivity.provideIntent(
+            activity,
+            PaymentLauncherBehavior(orderToken, false, configuration)
+        )
 
-            it.startActivity(intent)
-        }
+        activity.startActivity(intent)
     }
 
     fun startPaymentWithSavedCardFlow(
+        activity: Activity,
         orderToken: String,
         card: CardDvo,
         configuration: Configuration? = null
-    ): (Activity) -> Unit {
-        if (card.cvvRequired) {
-            return { activity ->
-                val intent = PaymentLauncherActivity.provideIntent(
-                    activity,
-                    CvvPaymentLauncherBehavior(
-                        orderToken,
-                        card.cardId,
-                        card.cardNumber,
-                        card.cardType,
-                        configuration
-                    )
-                )
-
-                activity.startActivity(intent)
-            }
+    ) {
+        val intent = if (card.cvvRequired) {
+            PaymentLauncherActivity.provideIntent(
+                activity,
+                CvvPaymentLauncherBehavior(orderToken, card, configuration)
+            )
         } else {
-            return {
-                val intent = PayWithCardIdActivity.provideIntent(
-                    it,
-                    PayWithCardIdLauncher(
-                        orderToken,
-                        card.cardId
-                    )
-                )
-
-                it.startActivity(intent)
-            }
+            PayWithCardIdActivity.provideIntent(
+                activity, PayWithCardIdLauncher(orderToken, card.cardId)
+            )
         }
+
+        activity.startActivity(intent)
     }
 
     fun startSaveCardFlow(
+        activity: Activity,
         customerToken: String,
         configuration: Configuration? = null
-    ): (Activity) -> Unit {
+    ) {
         if (Config.isApiKeyInitialized().not()) {
             throw RuntimeException("Init Ioka with your API_KEY")
         }
 
-        return { activity ->
-            val intent = Intent(activity, SaveCardActivity::class.java)
-            intent.putExtra(
-                BaseActivity.LAUNCHER,
-                SaveCardLauncher(customerToken, configuration)
-            )
+        val intent = SaveCardActivity.provideIntent(
+            activity,
+            customerToken,
+            configuration
+        )
 
-            activity.startActivity(intent)
-        }
+        activity.startActivityForResult(intent, IOKA_SAVE_CARD_REQUEST_CODE)
     }
 
     suspend fun getCards(customerToken: String): List<CardModel> {
@@ -118,8 +94,8 @@ object Ioka {
                 panMasked = it.pan_masked,
                 expiryDate = it.expiry_date,
                 holder = it.holder,
-                paymentSystem = it.payment_system,
-                emitter = it.emitter,
+                paymentSystem = CardBrandModel.getByCode(it.payment_system),
+                emitter = CardEmitterModel.getByCode(it.emitter),
                 cvcRequired = it.cvc_required,
             )
         }

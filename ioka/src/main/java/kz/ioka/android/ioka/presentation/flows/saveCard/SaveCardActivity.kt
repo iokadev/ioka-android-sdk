@@ -1,5 +1,6 @@
 package kz.ioka.android.ioka.presentation.flows.saveCard
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -15,6 +16,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import kz.ioka.android.ioka.R
+import kz.ioka.android.ioka.api.Configuration
+import kz.ioka.android.ioka.api.FlowResult
+import kz.ioka.android.ioka.api.IOKA_EXTRA_RESULT_NAME
 import kz.ioka.android.ioka.di.DependencyInjector
 import kz.ioka.android.ioka.domain.cardInfo.CardInfoRepositoryImpl
 import kz.ioka.android.ioka.domain.saveCard.CardRepositoryImpl
@@ -32,6 +36,20 @@ import kz.ioka.android.ioka.viewBase.BaseActivity
 import kz.ioka.android.ioka.viewBase.Scannable
 
 internal class SaveCardActivity : BaseActivity(), View.OnClickListener, Scannable {
+
+    companion object {
+        fun provideIntent(
+            activity: Activity,
+            customerToken: String, configuration: Configuration?,
+        ): Intent {
+            return Intent(activity, SaveCardActivity::class.java).apply {
+                putExtra(
+                    LAUNCHER,
+                    SaveCardLauncher(customerToken, configuration)
+                )
+            }
+        }
+    }
 
     private val infoViewModel: CardInfoViewModel by viewModels {
         CardInfoViewModelFactory(
@@ -120,6 +138,10 @@ internal class SaveCardActivity : BaseActivity(), View.OnClickListener, Scannabl
             override fun onSuccess(): () -> Unit = {
                 lifecycleScope.launch {
                     delay(500)
+
+                    setResult(RESULT_OK, Intent().apply {
+                        putExtra(IOKA_EXTRA_RESULT_NAME, FlowResult.Succeeded)
+                    })
                     finish()
                 }
             }
@@ -214,6 +236,12 @@ internal class SaveCardActivity : BaseActivity(), View.OnClickListener, Scannabl
         )
 
         resultForThreeDSecure.launch(intent)
+    }
+
+    override fun onBackPressed() {
+        setResult(RESULT_CANCELED)
+
+        super.onBackPressed()
     }
 
     override fun onClick(v: View?) {

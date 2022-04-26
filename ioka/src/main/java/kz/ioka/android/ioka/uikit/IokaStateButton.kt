@@ -25,7 +25,7 @@ internal class IokaStateButton @JvmOverloads constructor(
     private lateinit var ivState: AppCompatImageView
     private lateinit var vProgress: ProgressBar
 
-    private var callback: Callback? = null
+    private var resultCallback: ResultCallback? = null
 
     init {
         val root = LayoutInflater.from(context).inflate(R.layout.ioka_state_button, this, true)
@@ -62,8 +62,8 @@ internal class IokaStateButton @JvmOverloads constructor(
         tvTitle.text = text
     }
 
-    fun setCallback(callback: Callback) {
-        this.callback = callback
+    fun setCallback(callback: ResultCallback) {
+        this.resultCallback = callback
     }
 
     fun setState(state: ButtonState) {
@@ -95,7 +95,7 @@ internal class IokaStateButton @JvmOverloads constructor(
                 animateColorTransition(colorFrom, colorTo)
             } else {
                 (background as? GradientDrawable)?.setTint(colorTo)
-                postDelayed({ callback?.onSuccess()?.invoke() }, 250)
+                postDelayed({ resultCallback?.onSuccess()?.invoke() }, 250)
             }
         }
     }
@@ -108,7 +108,7 @@ internal class IokaStateButton @JvmOverloads constructor(
             setCardBackgroundColor(animator.animatedValue as Int)
 
             if ((animator.animatedValue as Int) == colorTo) {
-                callback?.onSuccess()?.invoke()
+                resultCallback?.onSuccess()?.invoke()
             }
         }
 
@@ -126,7 +126,7 @@ internal sealed class ButtonState {
 
 }
 
-internal interface Callback {
+internal interface ResultCallback {
 
     fun onSuccess(): () -> Unit
 

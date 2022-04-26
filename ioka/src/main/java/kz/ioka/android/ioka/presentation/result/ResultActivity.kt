@@ -1,5 +1,7 @@
 package kz.ioka.android.ioka.presentation.result
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatImageView
@@ -7,6 +9,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import kz.ioka.android.ioka.R
+import kz.ioka.android.ioka.api.IOKA_EXTRA_RESULT_NAME
 import kz.ioka.android.ioka.util.getDrawableFromRes
 import kz.ioka.android.ioka.util.toAmountFormat
 import kz.ioka.android.ioka.viewBase.BaseActivity
@@ -14,7 +17,15 @@ import java.math.BigDecimal
 
 internal class ResultActivity : BaseActivity() {
 
-    private var launcher: ResultLauncher? = null
+    companion object {
+        fun provideIntent(context: Context, launcher: ResultLauncher): Intent {
+            return Intent(context, this::class.java).apply {
+                putExtra(LAUNCHER, launcher)
+            }
+        }
+    }
+
+    private lateinit var launcher: ResultLauncher
 
     lateinit var vToolbar: Toolbar
     lateinit var ivStatus: AppCompatImageView
@@ -27,9 +38,10 @@ internal class ResultActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.ioka_activity_result)
 
-        launcher = launcher()
+        launcher = launcher()!!
         bindViews()
         setData()
+        setupListeners()
     }
 
     private fun bindViews() {
@@ -42,7 +54,7 @@ internal class ResultActivity : BaseActivity() {
     }
 
     private fun setData() {
-        launcher?.let {
+        launcher.let {
             ivStatus.setImageDrawable(getDrawableFromRes(it.statusIconRes))
             tvTitle.setText(it.titleRes)
             tvTitle.setTextColor(ContextCompat.getColor(this, it.titleColorRes))
@@ -52,14 +64,23 @@ internal class ResultActivity : BaseActivity() {
             if (it.amount.amount != BigDecimal.ZERO)
                 tvAmount.text = it.amount.amount.toAmountFormat()
         }
+    }
 
+    private fun setupListeners() {
         vToolbar.setNavigationOnClickListener {
-            finish()
+            finishWithResult()
         }
 
         btnAction.setOnClickListener {
-            finish()
+            finishWithResult()
         }
+    }
+
+    private fun finishWithResult() {
+        setResult(RESULT_OK, Intent().apply {
+            putExtra(IOKA_EXTRA_RESULT_NAME, launcher.flowResult)
+        })
+        finish()
     }
 
 }

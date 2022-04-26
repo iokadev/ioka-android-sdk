@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.widget.AppCompatEditText
@@ -26,16 +27,12 @@ import kz.ioka.android.ioka.presentation.flows.common.CardInfoViewModel
 import kz.ioka.android.ioka.presentation.flows.common.CardInfoViewModelFactory
 import kz.ioka.android.ioka.presentation.flows.saveCard.SaveCardRequestState.*
 import kz.ioka.android.ioka.presentation.webView.SaveCardConfirmationBehavior
-import kz.ioka.android.ioka.presentation.webView.WebViewActivity
-import kz.ioka.android.ioka.presentation.webView.WebViewActivity.Companion.EXTRA_FAIL_CAUSE
-import kz.ioka.android.ioka.presentation.webView.WebViewActivity.Companion.RESULT_FAIL
-import kz.ioka.android.ioka.presentation.webView.WebViewActivity.Companion.RESULT_SUCCESS
 import kz.ioka.android.ioka.uikit.*
-import kz.ioka.android.ioka.util.getStringExtra
 import kz.ioka.android.ioka.viewBase.BaseActivity
 import kz.ioka.android.ioka.viewBase.Scannable
+import kz.ioka.android.ioka.viewBase.ThreeDSecurable
 
-internal class SaveCardActivity : BaseActivity(), View.OnClickListener, Scannable {
+internal class SaveCardActivity : BaseActivity(), View.OnClickListener, Scannable, ThreeDSecurable {
 
     companion object {
         fun provideIntent(
@@ -72,18 +69,11 @@ internal class SaveCardActivity : BaseActivity(), View.OnClickListener, Scannabl
     private lateinit var vError: ErrorView
     private lateinit var btnSave: IokaStateButton
 
-    private val resultForThreeDSecure =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == RESULT_SUCCESS) {
-                onSuccessAttempt()
-            } else if (it.resultCode == RESULT_FAIL) {
-                onFailedAttempt(
-                    it.getStringExtra(
-                        EXTRA_FAIL_CAUSE, getString(R.string.ioka_common_server_error)
-                    )
-                )
-            }
-        }
+    override val activityResultLauncher: ActivityResultLauncher<Intent>
+        get() = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult(),
+            activityResultCallback()
+        )
 
     override fun onCardScanned(cardNumber: String) {
         etCardNumber.setCardNumber(cardNumber)
@@ -134,23 +124,31 @@ internal class SaveCardActivity : BaseActivity(), View.OnClickListener, Scannabl
     }
 
     private fun setupViews() {
-        btnSave.setCallback(object : Callback {
+        btnSave.setCallback(object : ResultCallback {
             override fun onSuccess(): () -> Unit = {
-                lifecycleScope.launch {
-                    delay(500)
-
-                    setResult(RESULT_OK, Intent().apply {
-                        putExtra(IOKA_EXTRA_RESULT_NAME, FlowResult.Succeeded)
-                    })
-                    finish()
-                }
+                doAfterSuccess()
             }
         })
+    }
+
+    private fun doAfterSuccess() {
+        lifecycleScope.launch {
+            delay(500)
+
+            setResult(RESULT_OK, Intent().apply {
+                putExtra(IOKA_EXTRA_RESULT_NAME, FlowResult.Succeeded)
+            })
+            finish()
+        }
     }
 
     private fun setupListeners() {
         etCardNumber.onTextChanged = {
             saveCardViewModel.onCardPanEntered(it)
+        }
+
+        etCardNumber.onScanClicked = {
+            startCardScanner(this)
         }
 
         etCardNumber.onTextChangedWithDebounce = {
@@ -211,35 +209,31 @@ internal class SaveCardActivity : BaseActivity(), View.OnClickListener, Scannabl
         vCvvInput.isEnabled = state !is LOADING
 
         if (state is PENDING) {
-            onActionRequired(state.actionUrl)
+            onActionRequired(
+                this,
+                SaveCardConfirmationBehavior(
+                    url = state.actionUrl,
+                    customerToken = saveCardViewModel.customerToken,
+                    cardId = saveCardViewModel.cardId!!
+                )
+            )
         } else if (state is ERROR) {
             onFailedAttempt(state.cause ?: getString(R.string.ioka_common_server_error))
         }
     }
 
-    private fun onSuccessAttempt() {
+    override fun onSuccessfulAttempt() {
         btnSave.setState(ButtonState.Success)
     }
 
-    private fun onFailedAttempt(cause: String) {
+    override fun onFailedAttempt(cause: String?) {
         vError.show(cause)
     }
 
-    private fun onActionRequired(actionUrl: String) {
-        val intent = WebViewActivity.provideIntent(
-            this, SaveCardConfirmationBehavior(
-                toolbarTitleRes = R.string.ioka_common_payment_confirmation,
-                url = actionUrl,
-                customerToken = saveCardViewModel.customerToken,
-                cardId = saveCardViewModel.cardId ?: ""
-            )
-        )
-
-        resultForThreeDSecure.launch(intent)
-    }
-
     override fun onBackPressed() {
-        setResult(RESULT_CANCELED)
+        setResult(RESULT_CANCELED, Intent().apply {
+            putExtra(IOKA_EXTRA_RESULT_NAME, FlowResult.Cancelled)
+        })
 
         super.onBackPressed()
     }
@@ -260,6 +254,7 @@ internal class SaveCardActivity : BaseActivity(), View.OnClickListener, Scannabl
         }
     }
 
+    @Suppress("DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super<BaseActivity>.onActivityResult(requestCode, resultCode, data)
         super<Scannable>.onActivityResult(requestCode, resultCode, data)

@@ -1,6 +1,8 @@
 package kz.ioka.android.ioka.presentation.result
 
+import android.app.Activity.RESULT_OK
 import android.content.DialogInterface
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -11,19 +13,21 @@ import android.view.Window
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.fragment.app.DialogFragment
 import kz.ioka.android.ioka.R
+import kz.ioka.android.ioka.api.FlowResult
+import kz.ioka.android.ioka.api.IOKA_EXTRA_RESULT_NAME
 import kz.ioka.android.ioka.presentation.launcher.PaymentLauncherActivity
 import kz.ioka.android.ioka.uikit.IokaStateButton
 
-internal class ResultFragment : DialogFragment(R.layout.ioka_fragment_result) {
+internal class FailedResultFragment : DialogFragment(R.layout.ioka_fragment_failed_result) {
 
     companion object {
         private const val LAUNCHER = "ResultFragment_LAUNCHER"
 
-        fun newInstance(cause: String? = null): ResultFragment {
+        fun newInstance(cause: String? = null): FailedResultFragment {
             val args = Bundle()
             args.putString(LAUNCHER, cause)
 
-            val fragment = ResultFragment()
+            val fragment = FailedResultFragment()
             fragment.arguments = args
 
             return fragment
@@ -69,8 +73,18 @@ internal class ResultFragment : DialogFragment(R.layout.ioka_fragment_result) {
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
 
-        if (activity is PaymentLauncherActivity)
+        if (activity is PaymentLauncherActivity) {
+            activity?.setResult(
+                RESULT_OK,
+                Intent().putExtra(
+                    IOKA_EXTRA_RESULT_NAME,
+                    FlowResult.Failed(
+                        cause ?: getString(R.string.ioka_result_failed_payment_common_cause)
+                    )
+                )
+            )
             activity?.finish()
+        }
     }
 
 }

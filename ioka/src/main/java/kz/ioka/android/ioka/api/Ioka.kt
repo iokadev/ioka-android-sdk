@@ -38,7 +38,7 @@ object Ioka {
             PaymentLauncherBehavior(orderToken, false, configuration)
         )
 
-        activity.startActivity(intent)
+        activity.startActivityForResult(intent, IOKA_PAYMENT_REQUEST_CODE)
     }
 
     fun startPaymentWithSavedCardFlow(
@@ -58,7 +58,7 @@ object Ioka {
             )
         }
 
-        activity.startActivity(intent)
+        activity.startActivityForResult(intent, IOKA_PAYMENT_REQUEST_CODE)
     }
 
     fun startSaveCardFlow(

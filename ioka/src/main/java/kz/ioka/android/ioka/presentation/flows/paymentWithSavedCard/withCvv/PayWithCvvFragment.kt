@@ -1,5 +1,6 @@
 package kz.ioka.android.ioka.presentation.flows.paymentWithSavedCard.withCvv
 
+import android.app.Activity.RESULT_CANCELED
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -9,30 +10,36 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
 import androidx.core.widget.doAfterTextChanged
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import kz.ioka.android.ioka.R
+import kz.ioka.android.ioka.api.FlowResult
+import kz.ioka.android.ioka.api.IOKA_EXTRA_RESULT_NAME
 import kz.ioka.android.ioka.di.DependencyInjector
 import kz.ioka.android.ioka.domain.payment.PaymentRepositoryImpl
 import kz.ioka.android.ioka.presentation.flows.common.PaymentState
 import kz.ioka.android.ioka.presentation.launcher.PaymentLauncherActivity
+import kz.ioka.android.ioka.presentation.result.FailedResultFragment
 import kz.ioka.android.ioka.presentation.result.ResultActivity
-import kz.ioka.android.ioka.presentation.result.ResultFragment
 import kz.ioka.android.ioka.presentation.result.SuccessResultLauncher
+import kz.ioka.android.ioka.presentation.webView.PaymentConfirmationBehavior
 import kz.ioka.android.ioka.uikit.ButtonState
 import kz.ioka.android.ioka.uikit.IokaStateButton
 import kz.ioka.android.ioka.uikit.TooltipWindow
 import kz.ioka.android.ioka.util.shortPanMask
 import kz.ioka.android.ioka.util.showErrorToast
-import kz.ioka.android.ioka.viewBase.BaseActivity
-import kz.ioka.android.ioka.viewBase.BasePaymentFragment
+import kz.ioka.android.ioka.viewBase.ThreeDSecurable
 
-internal class PayWithCvvFragment : BasePaymentFragment(R.layout.ioka_fragment_cvv),
-    View.OnClickListener {
+internal class PayWithCvvFragment : DialogFragment(R.layout.ioka_fragment_cvv),
+    View.OnClickListener,
+    ThreeDSecurable {
 
     companion object {
         const val LAUNCHER = "CvvFragment_LAUNCHER"
@@ -65,6 +72,12 @@ internal class PayWithCvvFragment : BasePaymentFragment(R.layout.ioka_fragment_c
     private lateinit var etCvv: AppCompatEditText
     private lateinit var ivCvvFaq: AppCompatImageButton
     private lateinit var btnContinue: IokaStateButton
+
+    override val activityResultLauncher: ActivityResultLauncher<Intent>
+        get() = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult(),
+            activityResultCallback()
+        )
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -169,32 +182,35 @@ internal class PayWithCvvFragment : BasePaymentFragment(R.layout.ioka_fragment_c
 
         when (state) {
             PaymentState.SUCCESS -> {
-                onSuccessfulPayment()
+                onSuccessfulAttempt()
             }
             is PaymentState.FAILED -> {
-                onFailedPayment(state.cause)
+                onFailedAttempt(state.cause)
             }
             is PaymentState.ERROR -> {
-                context?.showErrorToast(state.cause ?: getString(R.string.ioka_common_server_error))
+                context?.showErrorToast(
+                    state.cause ?: getString(R.string.ioka_common_server_error)
+                )
             }
             is PaymentState.PENDING -> {
                 onActionRequired(
-                    state.actionUrl,
-                    viewModel.orderToken,
-                    viewModel.paymentId
+                    requireContext(),
+                    PaymentConfirmationBehavior(
+                        url = state.actionUrl,
+                        orderToken = viewModel.orderToken,
+                        paymentId = viewModel.paymentId
+                    )
                 )
             }
             else -> return
         }
     }
 
-    override fun onSuccessfulPayment() {
+    override fun onSuccessfulAttempt() {
         dismiss()
 
-        val intent = Intent(requireContext(), ResultActivity::class.java)
-        intent.putExtra(
-            BaseActivity.LAUNCHER,
-            SuccessResultLauncher(
+        val intent = ResultActivity.provideIntent(
+            requireContext(), SuccessResultLauncher(
                 subtitle = if (viewModel.order.externalId.isBlank()) ""
                 else getString(
                     R.string.ioka_result_success_payment_subtitle,
@@ -209,19 +225,24 @@ internal class PayWithCvvFragment : BasePaymentFragment(R.layout.ioka_fragment_c
             activity?.finish()
     }
 
-    override fun onFailedPayment(cause: String?) {
+    override fun onFailedAttempt(cause: String?) {
         activity?.supportFragmentManager?.popBackStack()
 
-        val a = ResultFragment.newInstance(cause)
-        a.show(requireActivity().supportFragmentManager, ResultFragment::class.simpleName)
+        val a = FailedResultFragment.newInstance(cause)
+        a.show(requireActivity().supportFragmentManager, FailedResultFragment::class.simpleName)
     }
 
     override fun onClick(v: View?) {
         when (v) {
             btnClose -> {
                 dismiss()
-                if (activity is PaymentLauncherActivity)
+                if (activity is PaymentLauncherActivity) {
+                    activity?.setResult(
+                        RESULT_CANCELED,
+                        Intent().putExtra(IOKA_EXTRA_RESULT_NAME, FlowResult.Cancelled)
+                    )
                     activity?.finish()
+                }
             }
 
             ivCvvFaq -> {

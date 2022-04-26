@@ -1,7 +1,6 @@
 package kz.ioka.android.ioka.uikit
 
 import android.content.Context
-import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
@@ -16,13 +15,11 @@ import androidx.appcompat.widget.AppCompatEditText
 import androidx.appcompat.widget.AppCompatImageButton
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.LinearLayoutCompat
-import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.content.ContextCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.setPadding
 import androidx.core.widget.ImageViewCompat
 import androidx.core.widget.doOnTextChanged
-import io.card.payment.CardIOActivity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
@@ -31,12 +28,6 @@ import kz.ioka.android.ioka.R
 import kz.ioka.android.ioka.presentation.flows.common.CardBrandDvo
 import kz.ioka.android.ioka.presentation.flows.common.CardEmitterDvo
 import kz.ioka.android.ioka.util.*
-import kz.ioka.android.ioka.util.Optional
-import kz.ioka.android.ioka.util.getDrawableFromRes
-import kz.ioka.android.ioka.util.textChanges
-import kz.ioka.android.ioka.util.toPx
-import kz.ioka.android.ioka.viewBase.BaseActivity
-import kz.ioka.android.ioka.viewBase.BaseActivity.Companion.SCAN_REQUEST_CODE
 
 internal class CardNumberEditText @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -51,6 +42,8 @@ internal class CardNumberEditText @JvmOverloads constructor(
     var onTextChangedWithDebounce: (String) -> Unit = {}
 
     var flowTextChangedWithDebounce: Flow<CharSequence?> = flow { }
+
+    var onScanClicked: () -> Unit = {}
 
     init {
         val root =
@@ -99,17 +92,7 @@ internal class CardNumberEditText @JvmOverloads constructor(
         }
 
         btnScan.setOnClickListener {
-            val scanIntent = Intent(context, CardIOActivity::class.java)
-
-            scanIntent.putExtra(CardIOActivity.EXTRA_REQUIRE_EXPIRY, true)
-            scanIntent.putExtra(CardIOActivity.EXTRA_REQUIRE_POSTAL_CODE, false)
-            scanIntent.putExtra(CardIOActivity.EXTRA_USE_PAYPAL_ACTIONBAR_ICON, false)
-            scanIntent.putExtra(CardIOActivity.EXTRA_SUPPRESS_MANUAL_ENTRY, true)
-            scanIntent.putExtra(CardIOActivity.EXTRA_SUPPRESS_CONFIRMATION, true)
-            scanIntent.putExtra(CardIOActivity.EXTRA_HIDE_CARDIO_LOGO, true)
-            scanIntent.putExtra(CardIOActivity.EXTRA_KEEP_APPLICATION_THEME, true)
-
-            startActivityForResult(context as BaseActivity, scanIntent, SCAN_REQUEST_CODE, null)
+            onScanClicked()
         }
     }
 

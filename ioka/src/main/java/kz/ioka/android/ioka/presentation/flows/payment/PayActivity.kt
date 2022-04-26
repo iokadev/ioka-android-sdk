@@ -2,6 +2,8 @@ package kz.ioka.android.ioka.presentation.flows.payment
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.widget.AppCompatEditText
 import androidx.appcompat.widget.AppCompatImageButton
@@ -24,22 +26,25 @@ import kz.ioka.android.ioka.presentation.flows.common.PaymentState
 import kz.ioka.android.ioka.presentation.result.ErrorResultLauncher
 import kz.ioka.android.ioka.presentation.result.ResultActivity
 import kz.ioka.android.ioka.presentation.result.SuccessResultLauncher
+import kz.ioka.android.ioka.presentation.webView.PaymentConfirmationBehavior
 import kz.ioka.android.ioka.uikit.ButtonState
 import kz.ioka.android.ioka.uikit.CardNumberEditText
 import kz.ioka.android.ioka.uikit.CvvEditText
 import kz.ioka.android.ioka.uikit.IokaStateButton
 import kz.ioka.android.ioka.util.showErrorToast
 import kz.ioka.android.ioka.util.toAmountFormat
-import kz.ioka.android.ioka.viewBase.BasePaymentActivity
+import kz.ioka.android.ioka.viewBase.BaseActivity
 import kz.ioka.android.ioka.viewBase.Scannable
+import kz.ioka.android.ioka.viewBase.ThreeDSecurable
 
-internal class PayActivity : BasePaymentActivity(), Scannable {
+internal class PayActivity : BaseActivity(), Scannable, ThreeDSecurable {
 
     private val cardInfoViewModel: CardInfoViewModel by viewModels {
         CardInfoViewModelFactory(
             CardInfoRepositoryImpl(DependencyInjector.cardInfoApi)
         )
     }
+
     private val viewModel: PayWithCardViewModel by viewModels {
         PayWithCardViewModelFactory(
             launcher()!!,
@@ -56,6 +61,11 @@ internal class PayActivity : BasePaymentActivity(), Scannable {
     private lateinit var vCvvInput: CvvEditText
     private lateinit var switchSaveCard: SwitchCompat
     private lateinit var btnPay: IokaStateButton
+
+    override val activityResultLauncher: ActivityResultLauncher<Intent> =
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult(), activityResultCallback()
+        )
 
     override fun onCardScanned(cardNumber: String) {
         etCardNumber.setCardNumber(cardNumber)
@@ -119,6 +129,10 @@ internal class PayActivity : BasePaymentActivity(), Scannable {
             viewModel.onCardPanEntered(it)
         }
 
+        etCardNumber.onScanClicked = {
+            startCardScanner(this)
+        }
+
         etExpireDate.doOnTextChanged { text, _, _, _ ->
             viewModel.onExpireDateEntered(text.toString().replace("/", ""))
         }
@@ -171,16 +185,19 @@ internal class PayActivity : BasePaymentActivity(), Scannable {
                 btnPay.setState(ButtonState.Default)
 
                 onActionRequired(
-                    state.actionUrl,
-                    viewModel.orderToken,
-                    viewModel.paymentId
+                    this,
+                    PaymentConfirmationBehavior(
+                        url = state.actionUrl,
+                        orderToken = viewModel.orderToken,
+                        paymentId = viewModel.paymentId
+                    )
                 )
             }
 
             PaymentState.SUCCESS -> {
                 btnPay.setState(ButtonState.Default)
 
-                onSuccessfulPayment()
+                onSuccessfulAttempt()
             }
 
             is PaymentState.ERROR -> {
@@ -192,7 +209,7 @@ internal class PayActivity : BasePaymentActivity(), Scannable {
             is PaymentState.FAILED -> {
                 btnPay.setState(ButtonState.Default)
 
-                onFailedPayment(
+                onFailedAttempt(
                     state.cause ?: getString(R.string.ioka_result_failed_payment_common_cause)
                 )
             }
@@ -220,13 +237,9 @@ internal class PayActivity : BasePaymentActivity(), Scannable {
         btnGooglePay.isEnabled = false
     }
 
-    override fun onSuccessfulPayment() {
-        finish()
-
-        val intent = Intent(this, ResultActivity::class.java)
-        intent.putExtra(
-            LAUNCHER,
-            SuccessResultLauncher(
+    override fun onSuccessfulAttempt() {
+        val intent = ResultActivity.provideIntent(
+            this, SuccessResultLauncher(
                 subtitle = getString(
                     R.string.ioka_result_success_payment_subtitle,
                     viewModel.order.externalId
@@ -236,24 +249,28 @@ internal class PayActivity : BasePaymentActivity(), Scannable {
         )
 
         startActivity(intent)
+        finish()
     }
 
-    override fun onFailedPayment(cause: String?) {
-        finish()
-
-        val intent = Intent(this, ResultActivity::class.java)
-        intent.putExtra(
-            LAUNCHER,
-            ErrorResultLauncher(
+    override fun onFailedAttempt(cause: String?) {
+        val intent = ResultActivity.provideIntent(
+            this, ErrorResultLauncher(
                 subtitle = cause ?: getString(R.string.ioka_result_failed_payment_common_cause)
             )
         )
 
         startActivity(intent)
+        finish()
     }
 
+    override fun onBackPressed() {
+        setResult(RESULT_CANCELED)
+        super.onBackPressed()
+    }
+
+    @Suppress("DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super<BasePaymentActivity>.onActivityResult(requestCode, resultCode, data)
+        super<BaseActivity>.onActivityResult(requestCode, resultCode, data)
         super<Scannable>.onActivityResult(requestCode, resultCode, data)
     }
 

@@ -19,7 +19,7 @@ internal class ResultActivity : BaseActivity() {
 
     companion object {
         fun provideIntent(context: Context, launcher: ResultLauncher): Intent {
-            return Intent(context, this::class.java).apply {
+            return Intent(context, ResultActivity::class.java).apply {
                 putExtra(LAUNCHER, launcher)
             }
         }
